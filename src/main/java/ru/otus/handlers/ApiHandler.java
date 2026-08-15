@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 public class ApiHandler {
 
-    private static final String baseUrl = "https://fakerestapi.azurewebsites.net";
+    private static final String baseUrl = System.getProperty("api.baseUrl");
     private static RequestSpecification requestSpecification =
             new RequestSpecBuilder()
                     .setBaseUri(baseUrl)
