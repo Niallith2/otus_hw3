@@ -53,6 +53,7 @@ pipeline {
                         --dockerfile=Dockerfile \
                         --cleanup \
                         --insecure \
+                        --skip-tls-verify-pull \
                         --build-arg=URL=${params.URL} \
                         --destination=${imageTag}
                     """
