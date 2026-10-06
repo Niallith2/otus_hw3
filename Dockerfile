@@ -5,6 +5,6 @@ ENV URL="https://fakerestapi.azurewebsites.net"
 
 WORKDIR /otus_hw3
 COPY . .
-RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline -Dmaven.wagon.http.ssl.ignore.validity.dates=true
 
 ENTRYPOINT ["./entrypoint.sh"]
