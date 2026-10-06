@@ -54,6 +54,7 @@ pipeline {
                         --cleanup \
                         --insecure \
                         --skip-tls-verify-pull \
+                        --skip-tls-verify \
                         --build-arg=URL=${params.URL} \
                         --destination=${imageTag}
                     """
