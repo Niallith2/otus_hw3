@@ -1,35 +1,47 @@
 pipeline {
-    agent { kubernetes { cloud "otus"; inheritFrom "kaniko"; defaultContainer "kaniko" } }
+    agent {
+        kubernetes {
+            cloud "otus"
+            inheritFrom "kaniko"
+            defaultContainer "kaniko"
+        }
+    }
     parameters {
-        string(name: 'URL', defaultValue: 'https://fakerestapi.azurewebsites.net', description: 'Base URL')
+        string(name: 'URL',
+               defaultValue: 'https://fakerestapi.azurewebsites.net',
+               description: 'Base URL для API-тестов')
     }
     stages {
         stage("Build Docker image") {
             steps {
                 script {
-                    def branch = env.BRANCH ?: params.BRANCH ?: 'master'
+                    def branch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'master'
+                    def currentCommit = env.GIT_COMMIT
+                    def previousCommit = env.GIT_PREVIOUS_COMMIT ?: ''
                     def imageTag = "registry.kube-system.svc.cluster.local/otus_hw3:${branch}"
-                    def currentCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 
-                    // 1. Проверка наличия образа в реестре
-                    def imageExists = sh(
-                        returnStatus: true,
-                        script: "crane manifest ${imageTag} > /dev/null 2>&1"
-                    ) == 0
+                    currentBuild.description = "BRANCH: ${branch}\nCOMMIT: ${currentCommit}\nURL: ${params.URL}"
 
-                    // 2. Проверка наличия новых коммитов
-                    def lastCommit = ''
-                    if (fileExists('last_built_commit.txt')) {
-                        lastCommit = readFile('last_built_commit.txt').trim()
-                    }
-                    def hasNewCommits = (currentCommit != lastCommit)
-
-                    if (imageExists && !hasNewCommits) {
-                        echo "Образ уже есть в реестре, новых коммитов нет — пропускаем."
+                    // Пропускаем, если коммит не менялся
+                    if (previousCommit && previousCommit == currentCommit) {
+                        echo "Коммит ${currentCommit} уже собирался — пропускаем."
                         return
                     }
 
-                    // 3. Сборка
+                    def imageExists = sh(
+                        returnStatus: true,
+                        script: """
+                            curl -sf -o /dev/null \
+                            -H 'Accept: application/vnd.docker.distribution.manifest.v2+json' \
+                            http://registry.kube-system.svc.cluster.local/v2/otus_hw3/manifests/${branch}
+                        """
+                    ) == 0
+
+                    if (imageExists && !previousCommit) {
+                        echo "Образ ${imageTag} уже есть в реестре — пропускаем."
+                        return
+                    }
+
                     sh """
                         /kaniko/executor \
                         --context=dir://. \
