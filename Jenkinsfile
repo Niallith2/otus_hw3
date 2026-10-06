@@ -16,7 +16,8 @@ pipeline {
                         --context=dir://. \
                         --dockerfile=registry.kube-system.svc.cluster.local/otus_hw3:${env.BRANCH} \
                         --cleanup \
-                        --insecure
+                        --insecure \
+                        --destination=registry.kube-system.svc.cluster.local/otus_hw3:${env.BRANCH}
                     """
                 }
             }
