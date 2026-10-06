@@ -1,5 +1,7 @@
 package ru.otus.handlers;
 
+import io.qameta.allure.Step;
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -19,8 +21,10 @@ public class ApiHandler {
                     .setBaseUri(baseUrl)
                     .setContentType(ContentType.JSON)
                     .setBasePath("/api/v1")
-                    .build();
+                    .build()
+                    .filter(new AllureRestAssured());
 
+    @Step("Получить всех авторов")
     public static Response getAuthors() {
         String url = "/Authors";
         return given()
@@ -35,6 +39,7 @@ public class ApiHandler {
                 .extract().response();
     }
 
+    @Step("Получить автора по id = {id}")
     public static Response getAuthor(int id) {
         String url = "/Authors/" + id;
         return given()
@@ -47,6 +52,7 @@ public class ApiHandler {
                 .extract().response();
     }
 
+    @Step("Создать автора")
     public static Response postAuthor(AuthorDto author) {
         String url = "/Authors";
         return given()

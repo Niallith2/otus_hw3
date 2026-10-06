@@ -1,11 +1,13 @@
 package ru.otus.wiremock;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import io.qameta.allure.Step;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 
 public class AuthorsStub {
 
+    @Step("Создать мок на получение автора по id")
     public static void createStubForGetAuthorById() {
         WiremockHandler
                 .getWireMockServer()
@@ -24,6 +26,7 @@ public class AuthorsStub {
                                         .withTransformers("response-template")));
     }
 
+    @Step("Создать мок на создание автора")
     public static void createStubForPostAuthor() {
         WiremockHandler
                 .getWireMockServer()
