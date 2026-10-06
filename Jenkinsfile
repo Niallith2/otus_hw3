@@ -14,7 +14,7 @@ pipeline {
                     sh """
                         /kaniko/executor \
                         --context=dir://. \
-                        --dockerfile=registry.kube-system.svc.cluster.local/otus_hw3:${env.BRANCH} \
+                        --dockerfile=Dockerfile \
                         --cleanup \
                         --insecure \
                         --destination=registry.kube-system.svc.cluster.local/otus_hw3:${env.BRANCH}
