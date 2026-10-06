@@ -22,7 +22,7 @@ pipeline {
                         --dockerfile=Dockerfile \
                         --cleanup \
                         --insecure \
-                        --build-arg=URL=${params.URL}
+                        --build-arg=URL=${params.URL} \
                         --destination=registry.kube-system.svc.cluster.local/otus_hw3:${env.BRANCH}
                     """
                 }
