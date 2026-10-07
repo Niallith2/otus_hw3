@@ -82,14 +82,27 @@ pipeline {
             }
             steps {
                 container("tests") {
-                    script {
-                        withEnv([
-                            "PROFILE=RestAssuredTests",
-                            "URL=${params.URL}"
-                        ]) {
-                            sh "/otus_hw3/entrypoint.sh"
+                    catchError(buildResult: "UNSTABLE", stageResult: "SUCCESS"){
+                        script {
+                            withEnv([
+                                "PROFILE=RestAssuredTests",
+                                "URL=${params.URL}"
+                            ]) {
+                                sh "/otus_hw3/entrypoint.sh"
+                            }
                         }
                     }
+                }
+            }
+        }
+        stage("Generate allure report") {
+            steps {
+                script {
+                    allure(
+                    results: [[path: "target/allure-results"]],
+                    disabled: false,
+                    reportBuildPolicy: "ALWAYS"
+                    )
                 }
             }
         }
