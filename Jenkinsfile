@@ -74,6 +74,7 @@ pipeline {
                         containers:
                             - name: tests
                               image: localhost:5000/otus_hw3:${branch}
+                              imagePullPolicy: Always
                               command: ["sleep"]
                               args: ["infinity"]
                     """
