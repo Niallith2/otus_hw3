@@ -89,6 +89,7 @@ pipeline {
                             ]) {
                                 sh "/otus_hw3/entrypoint.sh"
                             }
+                            sh "chmod -R 777 target || true"
                         }
                     }
                 }
@@ -96,12 +97,15 @@ pipeline {
         }
         stage("Generate allure report") {
             steps {
-                script {
-                    allure(
-                    results: [[path: "target/allure-results"]],
-                    disabled: false,
-                    reportBuildPolicy: "ALWAYS"
-                    )
+                catchError(buildResult: "UNSTABLE", stageResult: "SUCCESS"){
+                    script {
+                        allure(
+                            results: [[path: "target/allure-results"]],
+                            disabled: false,
+                            reportBuildPolicy: "ALWAYS"
+
+                       )
+                    }
                 }
             }
         }
