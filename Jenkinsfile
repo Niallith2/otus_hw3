@@ -1,18 +1,20 @@
 pipeline {
-    agent {
-        kubernetes {
-            cloud "otus"
-            inheritFrom "kaniko"
-            defaultContainer "kaniko"
-        }
-    }
+    agent none
     parameters {
         string(name: 'BRANCH', defaultValue: 'master', description: 'Branch')
         string(name: 'URL',    defaultValue: 'https://fakerestapi.azurewebsites.net', description: 'API Url')
         booleanParam(name: 'FORCE', defaultValue: false, description: 'Принудительно пересобрать образ')
     }
+
     stages {
         stage("Build Docker image") {
+            agent {
+                kubernetes {
+                    cloud "otus"
+                    inheritFrom "kaniko"
+                    defaultContainer "kaniko"
+                }
+            }
             steps {
                 script {
                     def branch          = params.BRANCH ?: 'master'
@@ -55,9 +57,33 @@ pipeline {
                         --insecure \
                         --skip-tls-verify-pull \
                         --skip-tls-verify \
-                        --build-arg=URL=${params.URL} \
                         --destination=${imageTag}
                     """
+                }
+            }
+        }
+        stage('Run tests') {
+            agent {
+                kubernetes {
+                    cloud "otus"
+                    inheritFrom "default"
+                    yaml """
+                    apiVersion: v1
+                    kind: Pod
+                    spec:
+                        containers:
+                            - name: tests
+                              image: localhost:5000/otus_hw3:${branch}
+                              command: ["sleep"]
+                              args: ["infinity"]
+                    """
+                }
+            }
+            steps {
+                container("tests") {
+                    script {
+                        sh "URL:${params.URL} /otus_hw3/entrypoint.sh"
+                    }
                 }
             }
         }
