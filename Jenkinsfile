@@ -2,7 +2,7 @@ pipeline {
     agent none
     parameters {
         string(name: 'BRANCH', defaultValue: 'master', description: 'Branch')
-        string(name: 'URL',    defaultValue: 'https://fakerestapi.azurewebsites.net', description: 'API Url')
+        string(name: 'URL', defaultValue: 'https://fakerestapi.azurewebsites.net', description: 'API Url')
         booleanParam(name: 'FORCE', defaultValue: false, description: 'Принудительно пересобрать образ')
     }
 
@@ -82,7 +82,12 @@ pipeline {
             steps {
                 container("tests") {
                     script {
-                        sh "URL:${params.URL} /otus_hw3/entrypoint.sh"
+                        withEnv([
+                            "PROFILE=RestAssuredTests",
+                            "URL=${params.URL}"
+                        ]) {
+                            sh "/otus_hw3/entrypoint.sh"
+                        }
                     }
                 }
             }
