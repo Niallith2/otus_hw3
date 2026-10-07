@@ -1,4 +1,4 @@
-FROM maven:3.9.16-eclipse-temurin-17
+FROM maven:3.9.16-eclipse-temurin-21
 
 ENV PROFILE="RestAssuredTests" \
     MAVEN_OPTS="-Dmaven.resolver.transport=wagon \
