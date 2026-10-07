@@ -1,5 +1,21 @@
 pipeline {
-    agent none
+    agent {
+        kubernetes {
+            cloud "otus"
+            inheritFrom "default"
+            yaml """
+                    apiVersion: v1
+                    kind: Pod
+                    spec:
+                        containers:
+                            - name: tests
+                              image: localhost:5000/otus_hw3:${branch}
+                              imagePullPolicy: Always
+                              command: ["sleep"]
+                              args: ["infinity"]
+                    """
+        }
+    }
     parameters {
         string(name: 'BRANCH', defaultValue: 'master', description: 'Branch')
         string(name: 'URL', defaultValue: 'https://fakerestapi.azurewebsites.net', description: 'API Url')
@@ -63,23 +79,6 @@ pipeline {
             }
         }
         stage('Run tests') {
-            agent {
-                kubernetes {
-                    cloud "otus"
-                    inheritFrom "default"
-                    yaml """
-                    apiVersion: v1
-                    kind: Pod
-                    spec:
-                        containers:
-                            - name: tests
-                              image: localhost:5000/otus_hw3:${branch}
-                              imagePullPolicy: Always
-                              command: ["sleep"]
-                              args: ["infinity"]
-                    """
-                }
-            }
             steps {
                 container("tests") {
                     catchError(buildResult: "UNSTABLE", stageResult: "SUCCESS"){
