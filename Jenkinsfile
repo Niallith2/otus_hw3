@@ -62,7 +62,7 @@ pipeline {
                 }
             }
         }
-        stage('Run tests') {
+        stage('Run tests and generate report') {
             agent {
                 kubernetes {
                     cloud "otus"
@@ -91,38 +91,12 @@ pipeline {
                                 sh "/otus_hw3/entrypoint.sh"
                             }
                             sh "chmod -R 777 target || true"
+                            allure(
+                                results: [[path: "target/allure-results"]],
+                                disabled: false,
+                                reportBuildPolicy: "ALWAYS"
+                            )
                         }
-                    }
-                }
-            }
-        }
-        stage("Generate allure report") {
-            agent {
-                kubernetes {
-                    cloud "otus"
-                    inheritFrom "default"
-                    yaml """
-                    apiVersion: v1
-                    kind: Pod
-                    spec:
-                        containers:
-                            - name: tests
-                              image: localhost:5000/otus_hw3:${branch}
-                              imagePullPolicy: Always
-                              command: ["sleep"]
-                              args: ["infinity"]
-                    """
-                }
-            }
-            steps {
-                catchError(buildResult: "UNSTABLE", stageResult: "SUCCESS"){
-                    script {
-                        allure(
-                            results: [[path: "target/allure-results"]],
-                            disabled: false,
-                            reportBuildPolicy: "ALWAYS"
-
-                       )
                     }
                 }
             }
